@@ -13,19 +13,21 @@ interface MobileMenuProps {
   visible: boolean;
   onClose: () => void;
   onNavigateToSignIn: () => void;
-  onNavigateToSignUp: () => void;
 }
 
 export const MobileMenu: React.FC<MobileMenuProps> = ({
   visible,
   onClose,
   onNavigateToSignIn,
-  onNavigateToSignUp,
 }) => {
+  const handleOpenSignIn = () => {
+    onClose();
+    onNavigateToSignIn();
+  };
+
   return (
     <Modal visible={visible} animationType="fade" transparent={false}>
       <SafeAreaView style={styles.safeArea}>
-        {/* Header của Menu */}
         <View style={styles.header}>
           <View style={styles.brand}>
             <View style={styles.logoSquare}>
@@ -36,10 +38,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
           <View style={styles.headerRight}>
             <TouchableOpacity
               style={styles.btnHeaderStart}
-              onPress={() => {
-                onClose();
-                onNavigateToSignUp();
-              }}
+              onPress={handleOpenSignIn}
             >
               <Text style={styles.btnHeaderStartText}>Get started</Text>
             </TouchableOpacity>
@@ -49,7 +48,6 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
           </View>
         </View>
 
-        {/* Danh sách liên kết điều hướng */}
         <View style={styles.menuBody}>
           <TouchableOpacity style={styles.menuLink} onPress={onClose}>
             <Text style={styles.menuLinkText}>Features</Text>
@@ -63,22 +61,13 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
 
           <View style={styles.divider} />
 
-          <TouchableOpacity
-            style={styles.menuLink}
-            onPress={() => {
-              onClose();
-              onNavigateToSignIn();
-            }}
-          >
+          <TouchableOpacity style={styles.menuLink} onPress={handleOpenSignIn}>
             <Text style={styles.menuLinkText}>Sign in</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.btnFullStart}
-            onPress={() => {
-              onClose();
-              onNavigateToSignUp();
-            }}
+            onPress={handleOpenSignIn}
           >
             <Text style={styles.btnFullStartText}>Get started</Text>
           </TouchableOpacity>
