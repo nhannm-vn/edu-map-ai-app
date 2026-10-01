@@ -59,15 +59,16 @@ export default function App() {
           />
         )}
 
-        {currentScreen === "dashboard" && (
-          <DashboardScreen user={currentUser} onLogout={handleLogout} />
-        )}
-
         {/* 3. Màn hình Đăng Ký */}
         {currentScreen === "signup" && (
           <SignUpScreen
             onNavigateToSignIn={() => setCurrentScreen("signin")}
             onBackToHome={() => setCurrentScreen("home")}
+            onRegisterSuccess={(user) => {
+              console.log("User đăng ký thành công:", user);
+              setCurrentUser(user);
+              setCurrentScreen("dashboard"); // Vào thẳng dashboard
+            }}
           />
         )}
 
