@@ -38,6 +38,38 @@ export interface RegisterResponse {
   };
 }
 
+export interface TopSkillItem {
+  id: string;
+  userId: string;
+  skillId: string;
+  proficiencyLevel: number;
+  hoursSpent: number;
+  verifiedByGithub: boolean;
+  createdAt: string;
+  skill: {
+    id: string;
+    name: string;
+    category: string;
+    difficultyLevel: number;
+    demandScore: number;
+    createdAt: string;
+  };
+}
+
+export interface SkillSummaryData {
+  totalSkills: number;
+  totalHours: number;
+  topSkills: TopSkillItem[];
+  categoryStats: Record<string, number>;
+}
+
+export interface SkillSummaryResponse {
+  success: boolean;
+  statusCode: number;
+  data?: SkillSummaryData;
+  message?: string;
+}
+
 const BASE_URL = "https://edumapai.io.vn/api";
 
 export const loginApi = async (
@@ -78,5 +110,27 @@ export const registerApi = async (
     return data;
   } catch (error: any) {
     throw new Error(error?.message || "Không thể kết nối đến máy chủ.");
+  }
+};
+
+export const getSkillSummaryApi = async (
+  token: string,
+): Promise<SkillSummaryResponse> => {
+  try {
+    const response = await fetch(`${BASE_URL}/v1/skills/my-skills/summary`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data: SkillSummaryResponse = await response.json();
+    return data;
+  } catch (error: any) {
+    throw new Error(
+      error?.message || "Không thể lấy dữ liệu thống kê kỹ năng.",
+    );
   }
 };
