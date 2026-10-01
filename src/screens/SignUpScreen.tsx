@@ -8,22 +8,83 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Sparkles, User, Mail, Lock, ArrowRight } from "lucide-react-native";
+import { registerApi } from "../services/authService";
 
 interface SignUpScreenProps {
   onNavigateToSignIn: () => void;
   onBackToHome?: () => void;
+  onRegisterSuccess?: (user: any, token: string) => void;
 }
 
 export const SignUpScreen: React.FC<SignUpScreenProps> = ({
   onNavigateToSignIn,
   onBackToHome,
+  onRegisterSuccess,
 }) => {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleRegister = async () => {
+    if (!fullName.trim() || !email.trim() || !password.trim()) {
+      Alert.alert("Thông báo", "Vui lòng nhập đầy đủ các trường thông tin.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      Alert.alert("Lỗi xác nhận", "Mật khẩu xác nhận không khớp.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const res = await registerApi({
+        fullName: fullName.trim(),
+        email: email.trim(),
+        password: password.trim(),
+      });
+
+      console.log("Register API Response:", res);
+
+      if (
+        (res.success || res.statusCode === 201 || res.statusCode === 200) &&
+        res.data
+      ) {
+        try {
+          await AsyncStorage.setItem("accessToken", res.data.accessToken);
+          await AsyncStorage.setItem("user", JSON.stringify(res.data.user));
+        } catch (storageErr) {
+          console.warn("Lỗi lưu AsyncStorage:", storageErr);
+        }
+
+        if (onRegisterSuccess) {
+          onRegisterSuccess(res.data.user, res.data.accessToken);
+        }
+      } else {
+        Alert.alert(
+          "Đăng ký thất bại",
+          res.message ||
+            "Không thể tạo tài khoản, vui lòng kiểm tra lại thông tin.",
+        );
+      }
+    } catch (err: any) {
+      console.error("Register Error:", err);
+      Alert.alert(
+        "Lỗi kết nối",
+        err.message || "Đã có lỗi xảy ra khi tạo tài khoản.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <KeyboardAvoidingView
@@ -34,8 +95,12 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
       >
-        {/* Brand header */}
-        <TouchableOpacity style={styles.brand} onPress={onBackToHome}>
+        {/* Brand Header */}
+        <TouchableOpacity
+          style={styles.brand}
+          onPress={onBackToHome}
+          activeOpacity={0.7}
+        >
           <View style={styles.logoSquare}>
             <Sparkles size={20} color="#ffffff" />
           </View>
@@ -50,7 +115,7 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
 
         {/* Form Inputs */}
         <View style={styles.form}>
-          {/* Full Name */}
+          {/* 1. Full Name */}
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Full name</Text>
             <View style={styles.inputWrapper}>
@@ -61,11 +126,12 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
                 placeholderTextColor="#94A3B8"
                 value={fullName}
                 onChangeText={setFullName}
+                editable={!loading}
               />
             </View>
           </View>
 
-          {/* Email */}
+          {/* 2. Email */}
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Email</Text>
             <View style={styles.inputWrapper}>
@@ -78,11 +144,12 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
                 autoCapitalize="none"
                 value={email}
                 onChangeText={setEmail}
+                editable={!loading}
               />
             </View>
           </View>
 
-          {/* Password & Confirm Split */}
+          {/* 3. Password & Confirm Split Row */}
           <View style={styles.rowInputs}>
             <View style={[styles.inputGroup, { flex: 1 }]}>
               <Text style={styles.label}>Password</Text>
@@ -95,6 +162,7 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
                   secureTextEntry
                   value={password}
                   onChangeText={setPassword}
+                  editable={!loading}
                 />
               </View>
             </View>
@@ -110,15 +178,31 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
                   secureTextEntry
                   value={confirmPassword}
                   onChangeText={setConfirmPassword}
+                  editable={!loading}
                 />
               </View>
             </View>
           </View>
 
-          {/* Submit CTA */}
-          <TouchableOpacity style={styles.btnSubmit} activeOpacity={0.85}>
-            <Text style={styles.btnSubmitText}>Create account</Text>
-            <ArrowRight size={18} color="#ffffff" style={{ marginLeft: 6 }} />
+          {/* Submit Button */}
+          <TouchableOpacity
+            style={[styles.btnSubmit, loading && { opacity: 0.7 }]}
+            activeOpacity={0.85}
+            onPress={handleRegister}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#ffffff" />
+            ) : (
+              <>
+                <Text style={styles.btnSubmitText}>Create account</Text>
+                <ArrowRight
+                  size={18}
+                  color="#ffffff"
+                  style={{ marginLeft: 6 }}
+                />
+              </>
+            )}
           </TouchableOpacity>
 
           {/* Terms Footer */}
@@ -142,9 +226,20 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
 };
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: "#ffffff" },
-  container: { paddingHorizontal: 24, paddingTop: 40, paddingBottom: 40 },
-  brand: { flexDirection: "row", alignItems: "center", marginBottom: 40 },
+  screen: {
+    flex: 1,
+    backgroundColor: "#ffffff",
+  },
+  container: {
+    paddingHorizontal: 24,
+    paddingTop: 40,
+    paddingBottom: 40,
+  },
+  brand: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 30,
+  },
   logoSquare: {
     width: 38,
     height: 38,
@@ -154,12 +249,33 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginRight: 10,
   },
-  brandTitle: { fontSize: 18, fontWeight: "700", color: "#0F172A" },
-  title: { fontSize: 32, fontWeight: "800", color: "#0F172A", marginBottom: 8 },
-  subtitle: { fontSize: 15, color: "#64748B", marginBottom: 28 },
-  form: { gap: 16 },
-  inputGroup: { gap: 8 },
-  label: { fontSize: 14, fontWeight: "600", color: "#1E293B" },
+  brandTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#0F172A",
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: "800",
+    color: "#0F172A",
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 15,
+    color: "#64748B",
+    marginBottom: 28,
+  },
+  form: {
+    gap: 16,
+  },
+  inputGroup: {
+    gap: 8,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#1E293B",
+  },
   inputWrapper: {
     flexDirection: "row",
     alignItems: "center",
@@ -170,9 +286,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     height: 50,
   },
-  inputIcon: { marginRight: 10 },
-  input: { flex: 1, fontSize: 15, color: "#0F172A" },
-  rowInputs: { flexDirection: "row", gap: 12 },
+  inputIcon: {
+    marginRight: 10,
+  },
+  input: {
+    flex: 1,
+    fontSize: 15,
+    color: "#0F172A",
+    paddingVertical: 0,
+    borderWidth: 0,
+    // @ts-ignore: khử viền outline trên nền web nếu có chạy web
+    outlineWidth: 0,
+  },
+  rowInputs: {
+    flexDirection: "row",
+    gap: 12,
+  },
   btnSubmit: {
     flexDirection: "row",
     alignItems: "center",
@@ -182,19 +311,33 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginTop: 8,
   },
-  btnSubmitText: { color: "#ffffff", fontSize: 16, fontWeight: "600" },
+  btnSubmitText: {
+    color: "#ffffff",
+    fontSize: 16,
+    fontWeight: "600",
+  },
   termsText: {
     fontSize: 13,
     color: "#94A3B8",
     textAlign: "center",
     marginTop: 12,
   },
-  linkText: { textDecorationLine: "underline", color: "#64748B" },
+  linkText: {
+    textDecorationLine: "underline",
+    color: "#64748B",
+  },
   switchAuthRow: {
     flexDirection: "row",
     justifyContent: "center",
     marginTop: 20,
   },
-  switchAuthText: { fontSize: 14, color: "#64748B" },
-  switchAuthLink: { fontSize: 14, fontWeight: "700", color: "#0F172A" },
+  switchAuthText: {
+    fontSize: 14,
+    color: "#64748B",
+  },
+  switchAuthLink: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#0F172A",
+  },
 });
