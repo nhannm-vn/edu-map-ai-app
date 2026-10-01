@@ -31,11 +31,13 @@ import { DashboardSidebar } from "../components/DashboardSidebar";
 interface DashboardScreenProps {
   user: UserData | null;
   onLogout: () => void;
+  onNavigateToSubscription?: () => void;
 }
 
 export const DashboardScreen: React.FC<DashboardScreenProps> = ({
   user,
   onLogout,
+  onNavigateToSubscription,
 }) => {
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [summaryData, setSummaryData] = useState<SkillSummaryData | null>(null);
@@ -68,7 +70,6 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
     fetchDashboardData();
   };
 
-  // Tính tổng số categories và tìm giá trị lớn nhất để tính % cho progress bar
   const categories = summaryData?.categoryStats
     ? Object.entries(summaryData.categoryStats)
     : [];
@@ -86,6 +87,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
         visible={sidebarVisible}
         onClose={() => setSidebarVisible(false)}
         onLogout={onLogout}
+        onNavigateToSubscription={onNavigateToSubscription}
       />
 
       {/* TOP HEADER */}

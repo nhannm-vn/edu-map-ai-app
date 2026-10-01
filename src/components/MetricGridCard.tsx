@@ -63,6 +63,7 @@ const styles = StyleSheet.create({
     marginBottom: 36,
   },
   metricItem: {
+    backgroundColor: "#ffffff",
     borderWidth: 1,
     borderColor: "#E2E8F0",
     borderRadius: 12,

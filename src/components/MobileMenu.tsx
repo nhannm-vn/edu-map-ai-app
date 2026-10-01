@@ -1,13 +1,7 @@
 import React from "react";
-import {
-  StyleSheet,
-  View,
-  Text,
-  TouchableOpacity,
-  Modal,
-  SafeAreaView,
-} from "react-native";
+import { StyleSheet, View, Text, TouchableOpacity, Modal } from "react-native";
 import { Sparkles, X } from "lucide-react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 interface MobileMenuProps {
   visible: boolean;
