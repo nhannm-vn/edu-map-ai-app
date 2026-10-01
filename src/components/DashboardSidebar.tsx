@@ -31,22 +31,24 @@ interface DashboardSidebarProps {
   visible: boolean;
   onClose: () => void;
   onLogout: () => void;
+  onNavigateToSubscription?: () => void;
+  onNavigateToDashboard?: () => void;
 }
 
 export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
   visible,
   onClose,
   onLogout,
+  onNavigateToSubscription,
+  onNavigateToDashboard,
 }) => {
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View style={styles.overlay}>
-        {/* Nền làm mờ click ngoài đóng menu */}
         <TouchableWithoutFeedback onPress={onClose}>
           <View style={styles.backdrop} />
         </TouchableWithoutFeedback>
 
-        {/* Nội dung Sidebar */}
         <SafeAreaView style={styles.sidebarContainer}>
           <View style={styles.sidebarHeader}>
             <Text style={styles.sidebarTitle}>MENU</Text>
@@ -63,10 +65,16 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
             contentContainerStyle={styles.menuScrollContent}
             showsVerticalScrollIndicator={false}
           >
-            {/* WORKSPACE GROUP */}
+            {/* WORKSPACE */}
             <Text style={styles.groupLabel}>Workspace</Text>
 
-            <TouchableOpacity style={[styles.menuItem, styles.menuItemActive]}>
+            <TouchableOpacity
+              style={[styles.menuItem, styles.menuItemActive]}
+              onPress={() => {
+                onClose();
+                if (onNavigateToDashboard) onNavigateToDashboard();
+              }}
+            >
               <LayoutGrid size={18} color="#0F172A" />
               <Text style={[styles.menuItemText, styles.menuItemTextActive]}>
                 Dashboard
@@ -121,10 +129,16 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
               </View>
             </TouchableOpacity>
 
-            {/* ACCOUNT GROUP */}
+            {/* ACCOUNT */}
             <Text style={[styles.groupLabel, { marginTop: 24 }]}>Account</Text>
 
-            <TouchableOpacity style={styles.menuItem}>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                onClose();
+                if (onNavigateToSubscription) onNavigateToSubscription();
+              }}
+            >
               <Award size={18} color="#64748B" />
               <Text style={styles.menuItemText}>Subscription</Text>
             </TouchableOpacity>
@@ -139,13 +153,20 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
               <Text style={styles.menuItemText}>Settings</Text>
             </TouchableOpacity>
 
-            {/* UPGRADE BANNER */}
+            {/* UPGRADE PRO BOX */}
             <View style={styles.upgradeCard}>
               <Text style={styles.upgradeTitle}>Upgrade to Pro</Text>
               <Text style={styles.upgradeDesc}>
                 Unlimited AI mentor and analytics.
               </Text>
-              <TouchableOpacity style={styles.btnUpgrade} activeOpacity={0.85}>
+              <TouchableOpacity
+                style={styles.btnUpgrade}
+                activeOpacity={0.85}
+                onPress={() => {
+                  onClose();
+                  if (onNavigateToSubscription) onNavigateToSubscription();
+                }}
+              >
                 <Text style={styles.btnUpgradeText}>Upgrade</Text>
               </TouchableOpacity>
             </View>

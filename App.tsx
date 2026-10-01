@@ -6,19 +6,24 @@ import { HomeScreen } from "./src/screens/HomeScreen";
 import { SignUpScreen } from "./src/screens/SignUpScreen";
 import { SignInScreen } from "./src/screens/SignInScreen";
 import { DashboardScreen } from "./src/screens/DashboardScreen";
+import { SubscriptionScreen } from "./src/screens/SubscriptionScreen";
 import { MobileMenu } from "./src/components/MobileMenu";
 import { UserData } from "./src/services/authService";
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<
-    "home" | "signin" | "signup" | "dashboard"
+    "home" | "signin" | "signup" | "dashboard" | "subscription"
   >("home");
   const [currentUser, setCurrentUser] = useState<UserData | null>(null);
   const [menuVisible, setMenuVisible] = useState(false);
 
   const handleLogout = async () => {
-    await AsyncStorage.removeItem("accessToken");
-    await AsyncStorage.removeItem("user");
+    try {
+      await AsyncStorage.removeItem("accessToken");
+      await AsyncStorage.removeItem("user");
+    } catch (e) {
+      console.warn("Lỗi xoá token AsyncStorage:", e);
+    }
     setCurrentUser(null);
     setCurrentScreen("home");
   };
@@ -31,14 +36,14 @@ export default function App() {
       >
         <StatusBar style="dark" />
 
-        {/* Modal Menu thả xuống */}
+        {/* Modal Menu thả xuống của trang chủ */}
         <MobileMenu
           visible={menuVisible}
           onClose={() => setMenuVisible(false)}
           onNavigateToSignIn={() => setCurrentScreen("signin")}
         />
 
-        {/* 1. Màn hình Trang Chủ */}
+        {/* 1. Màn hình Landing Home */}
         {currentScreen === "home" && (
           <HomeScreen
             onOpenMenu={() => setMenuVisible(true)}
@@ -52,9 +57,8 @@ export default function App() {
             onNavigateToSignUp={() => setCurrentScreen("signup")}
             onBackToHome={() => setCurrentScreen("home")}
             onLoginSuccess={(user) => {
-              console.log("User đăng nhập:", user);
               setCurrentUser(user);
-              setCurrentScreen("dashboard"); // Đổi state sang dashboard
+              setCurrentScreen("dashboard");
             }}
           />
         )}
@@ -65,16 +69,28 @@ export default function App() {
             onNavigateToSignIn={() => setCurrentScreen("signin")}
             onBackToHome={() => setCurrentScreen("home")}
             onRegisterSuccess={(user) => {
-              console.log("User đăng ký thành công:", user);
               setCurrentUser(user);
-              setCurrentScreen("dashboard"); // Vào thẳng dashboard
+              setCurrentScreen("dashboard");
             }}
           />
         )}
 
-        {/* 4. Màn hình Dashboard sau khi Login */}
+        {/* 4. Màn hình Dashboard (sau khi login) */}
         {currentScreen === "dashboard" && (
-          <DashboardScreen user={currentUser} onLogout={handleLogout} />
+          <DashboardScreen
+            user={currentUser}
+            onLogout={handleLogout}
+            onNavigateToSubscription={() => setCurrentScreen("subscription")}
+          />
+        )}
+
+        {/* 5. Màn hình Subscription */}
+        {currentScreen === "subscription" && (
+          <SubscriptionScreen
+            user={currentUser}
+            onLogout={handleLogout}
+            onNavigateToDashboard={() => setCurrentScreen("dashboard")}
+          />
         )}
       </SafeAreaView>
     </SafeAreaProvider>
