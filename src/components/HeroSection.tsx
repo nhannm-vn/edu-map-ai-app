@@ -2,7 +2,11 @@ import React from "react";
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import { Sparkles, ArrowRight, Play } from "lucide-react-native";
 
-export const HeroSection: React.FC = () => {
+interface HeroSectionProps {
+  onGetStarted?: () => void;
+}
+
+export const HeroSection: React.FC<HeroSectionProps> = ({ onGetStarted }) => {
   return (
     <View style={styles.container}>
       <View style={styles.badgePill}>
@@ -17,7 +21,11 @@ export const HeroSection: React.FC = () => {
         the gaps, and builds the roadmap to your dream role.
       </Text>
       <View style={styles.actions}>
-        <TouchableOpacity style={styles.btnPrimary} activeOpacity={0.85}>
+        <TouchableOpacity
+          style={styles.btnPrimary}
+          activeOpacity={0.85}
+          onPress={onGetStarted}
+        >
           <Text style={styles.btnPrimaryText}>Get started</Text>
           <ArrowRight size={18} color="#ffffff" style={{ marginLeft: 6 }} />
         </TouchableOpacity>

@@ -2,7 +2,12 @@ import React from "react";
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import { Sparkles, Menu } from "lucide-react-native";
 
-export const Header: React.FC = () => {
+interface HeaderProps {
+  onGetStarted?: () => void;
+  onOpenMenu?: () => void;
+}
+
+export const Header: React.FC<HeaderProps> = ({ onGetStarted, onOpenMenu }) => {
   return (
     <View style={styles.header}>
       <View style={styles.brand}>
@@ -12,10 +17,18 @@ export const Header: React.FC = () => {
         <Text style={styles.brandTitle}>EduMap AI</Text>
       </View>
       <View style={styles.actions}>
-        <TouchableOpacity style={styles.btnStart} activeOpacity={0.8}>
+        <TouchableOpacity
+          style={styles.btnStart}
+          activeOpacity={0.8}
+          onPress={onGetStarted}
+        >
           <Text style={styles.btnStartText}>Get started</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.btnMenu} activeOpacity={0.7}>
+        <TouchableOpacity
+          style={styles.btnMenu}
+          activeOpacity={0.7}
+          onPress={onOpenMenu}
+        >
           <Menu size={22} color="#1E293B" />
         </TouchableOpacity>
       </View>

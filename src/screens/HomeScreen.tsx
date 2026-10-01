@@ -5,16 +5,28 @@ import { HeroSection } from "../components/HeroSection";
 import { MetricGridCard } from "../components/MetricGridCard";
 import { PricingSection } from "../components/PricingSection";
 
-export const HomeScreen: React.FC = () => {
+interface HomeScreenProps {
+  onGetStarted?: () => void;
+  onOpenMenu?: () => void;
+}
+
+export const HomeScreen: React.FC<HomeScreenProps> = ({
+  onGetStarted,
+  onOpenMenu,
+}) => {
   return (
     <View style={styles.screen}>
-      <Header />
+      {/* Phải truyền onGetStarted và onOpenMenu vào đây */}
+      <Header onGetStarted={onGetStarted} onOpenMenu={onOpenMenu} />
+
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <HeroSection />
+        {/* Phải truyền onGetStarted vào đây */}
+        <HeroSection onGetStarted={onGetStarted} />
+
         <MetricGridCard />
         <PricingSection />
         <View style={{ height: 40 }} />
