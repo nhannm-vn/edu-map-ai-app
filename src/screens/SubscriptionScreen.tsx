@@ -32,12 +32,14 @@ interface SubscriptionScreenProps {
   user: UserData | null;
   onLogout: () => void;
   onNavigateToDashboard?: () => void;
+  onNavigateToUsage?: () => void;
 }
 
 export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
   user,
   onLogout,
   onNavigateToDashboard,
+  onNavigateToUsage,
 }) => {
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [plans, setPlans] = useState<PlanItem[]>([]);
@@ -176,6 +178,7 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
         onClose={() => setSidebarVisible(false)}
         onLogout={onLogout}
         onNavigateToDashboard={onNavigateToDashboard}
+        onNavigateToUsage={onNavigateToUsage}
       />
 
       {/* HEADER */}

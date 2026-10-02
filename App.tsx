@@ -7,12 +7,13 @@ import { SignUpScreen } from "./src/screens/SignUpScreen";
 import { SignInScreen } from "./src/screens/SignInScreen";
 import { DashboardScreen } from "./src/screens/DashboardScreen";
 import { SubscriptionScreen } from "./src/screens/SubscriptionScreen";
+import { UsageScreen } from "./src/screens/UsageScreen";
 import { MobileMenu } from "./src/components/MobileMenu";
 import { UserData } from "./src/services/authService";
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<
-    "home" | "signin" | "signup" | "dashboard" | "subscription"
+    "home" | "signin" | "signup" | "dashboard" | "subscription" | "usage"
   >("home");
   const [currentUser, setCurrentUser] = useState<UserData | null>(null);
   const [menuVisible, setMenuVisible] = useState(false);
@@ -75,12 +76,13 @@ export default function App() {
           />
         )}
 
-        {/* 4. Màn hình Dashboard (sau khi login) */}
+        {/* 4. Màn hình Dashboard */}
         {currentScreen === "dashboard" && (
           <DashboardScreen
             user={currentUser}
             onLogout={handleLogout}
             onNavigateToSubscription={() => setCurrentScreen("subscription")}
+            onNavigateToUsage={() => setCurrentScreen("usage")}
           />
         )}
 
@@ -89,6 +91,16 @@ export default function App() {
           <SubscriptionScreen
             user={currentUser}
             onLogout={handleLogout}
+            onNavigateToDashboard={() => setCurrentScreen("dashboard")}
+          />
+        )}
+
+        {/* 6. Màn hình Usage */}
+        {currentScreen === "usage" && (
+          <UsageScreen
+            user={currentUser}
+            onLogout={handleLogout}
+            onNavigateToSubscription={() => setCurrentScreen("subscription")}
             onNavigateToDashboard={() => setCurrentScreen("dashboard")}
           />
         )}

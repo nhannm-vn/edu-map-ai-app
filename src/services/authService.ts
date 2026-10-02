@@ -140,6 +140,27 @@ export interface MySubscriptionResponse {
   message?: string;
 }
 
+export interface UsageItemData {
+  featureCode: string;
+  limit: number;
+  usage: number;
+  remaining: number;
+  usageWindow: "DAILY" | "MONTHLY";
+  usageDate: string;
+}
+
+export interface BillingUsageData {
+  planCode: string;
+  usage: UsageItemData[];
+}
+
+export interface BillingUsageResponse {
+  success: boolean;
+  statusCode: number;
+  data?: BillingUsageData;
+  message?: string;
+}
+
 const BASE_URL = "https://edumapai.io.vn/api";
 
 export const loginApi = async (
@@ -242,5 +263,23 @@ export const getMySubscriptionApi = async (
     return await response.json();
   } catch (error: any) {
     throw new Error(error?.message || "Không thể lấy thông tin gói hiện tại.");
+  }
+};
+
+export const getBillingUsageApi = async (
+  token: string,
+): Promise<BillingUsageResponse> => {
+  try {
+    const response = await fetch(`${BASE_URL}/v1/billing/usage`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return await response.json();
+  } catch (error: any) {
+    throw new Error(error?.message || "Không thể lấy dữ liệu hạn mức sử dụng.");
   }
 };
