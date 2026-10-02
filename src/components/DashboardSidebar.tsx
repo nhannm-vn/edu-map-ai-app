@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   Modal,
   ScrollView,
-  SafeAreaView,
   TouchableWithoutFeedback,
 } from "react-native";
 import {
@@ -26,6 +25,7 @@ import {
   LogOut,
   FolderClosed,
 } from "lucide-react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 interface DashboardSidebarProps {
   visible: boolean;
@@ -33,6 +33,7 @@ interface DashboardSidebarProps {
   onLogout: () => void;
   onNavigateToSubscription?: () => void;
   onNavigateToDashboard?: () => void;
+  onNavigateToUsage?: () => void; // <-- Thêm prop này
 }
 
 export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
@@ -41,6 +42,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
   onLogout,
   onNavigateToSubscription,
   onNavigateToDashboard,
+  onNavigateToUsage, // <-- Thêm prop này
 }) => {
   return (
     <Modal visible={visible} transparent animationType="fade">
@@ -67,7 +69,6 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
           >
             {/* WORKSPACE */}
             <Text style={styles.groupLabel}>Workspace</Text>
-
             <TouchableOpacity
               style={[styles.menuItem, styles.menuItemActive]}
               onPress={() => {
@@ -80,47 +81,38 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                 Dashboard
               </Text>
             </TouchableOpacity>
-
             <TouchableOpacity style={styles.menuItem}>
               <MessageSquare size={18} color="#64748B" />
               <Text style={styles.menuItemText}>AI Mentor</Text>
             </TouchableOpacity>
-
             <TouchableOpacity style={styles.menuItem}>
               <UploadCloud size={18} color="#64748B" />
               <Text style={styles.menuItemText}>Upload & Analyze</Text>
             </TouchableOpacity>
-
             <TouchableOpacity style={styles.menuItem}>
               <GitBranch size={18} color="#64748B" />
               <Text style={styles.menuItemText}>Skill Tree</Text>
             </TouchableOpacity>
-
             <TouchableOpacity style={styles.menuItem}>
               <BookOpen size={18} color="#64748B" />
               <Text style={styles.menuItemText}>Resources</Text>
             </TouchableOpacity>
-
             <TouchableOpacity style={styles.menuItem}>
               <Clock size={18} color="#64748B" />
               <Text style={styles.menuItemText}>History</Text>
             </TouchableOpacity>
-
             <TouchableOpacity style={styles.menuItem}>
               <FolderClosed size={18} color="#64748B" />
               <Text style={styles.menuItemText}>Portfolio</Text>
             </TouchableOpacity>
-
             <TouchableOpacity style={styles.menuItem}>
               <Briefcase size={18} color="#64748B" />
               <Text style={styles.menuItemText}>Jobs</Text>
             </TouchableOpacity>
-
             <TouchableOpacity style={styles.menuItem}>
               <User size={18} color="#64748B" />
               <Text style={styles.menuItemText}>Profile</Text>
             </TouchableOpacity>
-
             <TouchableOpacity style={styles.menuItem}>
               <Bell size={18} color="#64748B" />
               <Text style={styles.menuItemText}>Notifications</Text>
@@ -128,10 +120,8 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                 <Text style={styles.badgeCountText}>7</Text>
               </View>
             </TouchableOpacity>
-
             {/* ACCOUNT */}
             <Text style={[styles.groupLabel, { marginTop: 24 }]}>Account</Text>
-
             <TouchableOpacity
               style={styles.menuItem}
               onPress={() => {
@@ -143,16 +133,20 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
               <Text style={styles.menuItemText}>Subscription</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.menuItem}>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                onClose();
+                if (onNavigateToUsage) onNavigateToUsage();
+              }}
+            >
               <Activity size={18} color="#64748B" />
               <Text style={styles.menuItemText}>Usage</Text>
             </TouchableOpacity>
-
             <TouchableOpacity style={styles.menuItem}>
               <Settings size={18} color="#64748B" />
               <Text style={styles.menuItemText}>Settings</Text>
             </TouchableOpacity>
-
             {/* UPGRADE PRO BOX */}
             <View style={styles.upgradeCard}>
               <Text style={styles.upgradeTitle}>Upgrade to Pro</Text>
@@ -170,7 +164,6 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                 <Text style={styles.btnUpgradeText}>Upgrade</Text>
               </TouchableOpacity>
             </View>
-
             {/* SIGN OUT */}
             <TouchableOpacity
               style={styles.signOutItem}

@@ -32,12 +32,14 @@ interface DashboardScreenProps {
   user: UserData | null;
   onLogout: () => void;
   onNavigateToSubscription?: () => void;
+  onNavigateToUsage?: () => void;
 }
 
 export const DashboardScreen: React.FC<DashboardScreenProps> = ({
   user,
   onLogout,
   onNavigateToSubscription,
+  onNavigateToUsage,
 }) => {
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [summaryData, setSummaryData] = useState<SkillSummaryData | null>(null);
@@ -88,6 +90,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
         onClose={() => setSidebarVisible(false)}
         onLogout={onLogout}
         onNavigateToSubscription={onNavigateToSubscription}
+        onNavigateToUsage={onNavigateToUsage}
       />
 
       {/* TOP HEADER */}
