@@ -10,10 +10,17 @@ import { SubscriptionScreen } from "./src/screens/SubscriptionScreen";
 import { UsageScreen } from "./src/screens/UsageScreen";
 import { MobileMenu } from "./src/components/MobileMenu";
 import { UserData } from "./src/services/authService";
+import { ChatAiScreen } from "./src/screens/ChatAiScreen";
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<
-    "home" | "signin" | "signup" | "dashboard" | "subscription" | "usage"
+    | "home"
+    | "signin"
+    | "signup"
+    | "dashboard"
+    | "subscription"
+    | "usage"
+    | "chat"
   >("home");
   const [currentUser, setCurrentUser] = useState<UserData | null>(null);
   const [menuVisible, setMenuVisible] = useState(false);
@@ -83,6 +90,7 @@ export default function App() {
             onLogout={handleLogout}
             onNavigateToSubscription={() => setCurrentScreen("subscription")}
             onNavigateToUsage={() => setCurrentScreen("usage")}
+            onNavigateToChat={() => setCurrentScreen("chat")}
           />
         )}
 
@@ -102,6 +110,17 @@ export default function App() {
             onLogout={handleLogout}
             onNavigateToSubscription={() => setCurrentScreen("subscription")}
             onNavigateToDashboard={() => setCurrentScreen("dashboard")}
+          />
+        )}
+
+        {/* 7. Màn hình Chat với AI */}
+        {currentScreen === "chat" && (
+          <ChatAiScreen
+            user={currentUser}
+            onLogout={handleLogout}
+            onNavigateToDashboard={() => setCurrentScreen("dashboard")}
+            onNavigateToSubscription={() => setCurrentScreen("subscription")}
+            onNavigateToUsage={() => setCurrentScreen("usage")}
           />
         )}
       </SafeAreaView>
