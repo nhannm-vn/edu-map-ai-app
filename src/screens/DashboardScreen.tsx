@@ -5,7 +5,6 @@ import {
   Text,
   TouchableOpacity,
   ScrollView,
-  SafeAreaView,
   StatusBar,
   ActivityIndicator,
   RefreshControl,
@@ -27,15 +26,22 @@ import {
   SkillSummaryData,
 } from "../services/authService";
 import { DashboardSidebar } from "../components/DashboardSidebar";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 interface DashboardScreenProps {
   user: UserData | null;
   onLogout: () => void;
+  onNavigateToSubscription?: () => void;
+  onNavigateToUsage?: () => void;
+  onNavigateToChat?: () => void; // 1. Khai báo ở đây
 }
 
 export const DashboardScreen: React.FC<DashboardScreenProps> = ({
   user,
   onLogout,
+  onNavigateToSubscription,
+  onNavigateToUsage,
+  onNavigateToChat,
 }) => {
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [summaryData, setSummaryData] = useState<SkillSummaryData | null>(null);
@@ -68,7 +74,6 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
     fetchDashboardData();
   };
 
-  // Tính tổng số categories và tìm giá trị lớn nhất để tính % cho progress bar
   const categories = summaryData?.categoryStats
     ? Object.entries(summaryData.categoryStats)
     : [];
@@ -86,6 +91,9 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
         visible={sidebarVisible}
         onClose={() => setSidebarVisible(false)}
         onLogout={onLogout}
+        onNavigateToSubscription={onNavigateToSubscription}
+        onNavigateToUsage={onNavigateToUsage}
+        onNavigateToChat={onNavigateToChat} // 3. Truyền xuống Sidebar ở đây
       />
 
       {/* TOP HEADER */}

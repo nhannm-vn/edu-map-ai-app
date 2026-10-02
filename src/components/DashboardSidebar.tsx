@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   Modal,
   ScrollView,
-  SafeAreaView,
   TouchableWithoutFeedback,
 } from "react-native";
 import {
@@ -26,27 +25,34 @@ import {
   LogOut,
   FolderClosed,
 } from "lucide-react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 interface DashboardSidebarProps {
   visible: boolean;
   onClose: () => void;
   onLogout: () => void;
+  onNavigateToSubscription?: () => void;
+  onNavigateToDashboard?: () => void;
+  onNavigateToUsage?: () => void;
+  onNavigateToChat?: () => void; // Bắt buộc có dòng này
 }
 
 export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
   visible,
   onClose,
   onLogout,
+  onNavigateToSubscription,
+  onNavigateToDashboard,
+  onNavigateToUsage, // <-- Thêm prop này
+  onNavigateToChat,
 }) => {
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View style={styles.overlay}>
-        {/* Nền làm mờ click ngoài đóng menu */}
         <TouchableWithoutFeedback onPress={onClose}>
           <View style={styles.backdrop} />
         </TouchableWithoutFeedback>
 
-        {/* Nội dung Sidebar */}
         <SafeAreaView style={styles.sidebarContainer}>
           <View style={styles.sidebarHeader}>
             <Text style={styles.sidebarTitle}>MENU</Text>
@@ -63,56 +69,65 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
             contentContainerStyle={styles.menuScrollContent}
             showsVerticalScrollIndicator={false}
           >
-            {/* WORKSPACE GROUP */}
+            {/* WORKSPACE */}
             <Text style={styles.groupLabel}>Workspace</Text>
-
-            <TouchableOpacity style={[styles.menuItem, styles.menuItemActive]}>
+            <TouchableOpacity
+              style={[styles.menuItem, styles.menuItemActive]}
+              onPress={() => {
+                onClose();
+                if (onNavigateToDashboard) onNavigateToDashboard();
+              }}
+            >
               <LayoutGrid size={18} color="#0F172A" />
               <Text style={[styles.menuItemText, styles.menuItemTextActive]}>
                 Dashboard
               </Text>
             </TouchableOpacity>
-
-            <TouchableOpacity style={styles.menuItem}>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                console.log("Đã bấm AI Mentor");
+                onClose();
+                if (onNavigateToChat) {
+                  onNavigateToChat();
+                } else {
+                  console.warn(
+                    "onNavigateToChat chưa được truyền vào DashboardSidebar",
+                  );
+                }
+              }}
+            >
               <MessageSquare size={18} color="#64748B" />
               <Text style={styles.menuItemText}>AI Mentor</Text>
             </TouchableOpacity>
-
             <TouchableOpacity style={styles.menuItem}>
               <UploadCloud size={18} color="#64748B" />
               <Text style={styles.menuItemText}>Upload & Analyze</Text>
             </TouchableOpacity>
-
             <TouchableOpacity style={styles.menuItem}>
               <GitBranch size={18} color="#64748B" />
               <Text style={styles.menuItemText}>Skill Tree</Text>
             </TouchableOpacity>
-
             <TouchableOpacity style={styles.menuItem}>
               <BookOpen size={18} color="#64748B" />
               <Text style={styles.menuItemText}>Resources</Text>
             </TouchableOpacity>
-
             <TouchableOpacity style={styles.menuItem}>
               <Clock size={18} color="#64748B" />
               <Text style={styles.menuItemText}>History</Text>
             </TouchableOpacity>
-
             <TouchableOpacity style={styles.menuItem}>
               <FolderClosed size={18} color="#64748B" />
               <Text style={styles.menuItemText}>Portfolio</Text>
             </TouchableOpacity>
-
             <TouchableOpacity style={styles.menuItem}>
               <Briefcase size={18} color="#64748B" />
               <Text style={styles.menuItemText}>Jobs</Text>
             </TouchableOpacity>
-
             <TouchableOpacity style={styles.menuItem}>
               <User size={18} color="#64748B" />
               <Text style={styles.menuItemText}>Profile</Text>
             </TouchableOpacity>
-
             <TouchableOpacity style={styles.menuItem}>
               <Bell size={18} color="#64748B" />
               <Text style={styles.menuItemText}>Notifications</Text>
@@ -120,36 +135,50 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                 <Text style={styles.badgeCountText}>7</Text>
               </View>
             </TouchableOpacity>
-
-            {/* ACCOUNT GROUP */}
+            {/* ACCOUNT */}
             <Text style={[styles.groupLabel, { marginTop: 24 }]}>Account</Text>
-
-            <TouchableOpacity style={styles.menuItem}>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                onClose();
+                if (onNavigateToSubscription) onNavigateToSubscription();
+              }}
+            >
               <Award size={18} color="#64748B" />
               <Text style={styles.menuItemText}>Subscription</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.menuItem}>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                onClose();
+                if (onNavigateToUsage) onNavigateToUsage();
+              }}
+            >
               <Activity size={18} color="#64748B" />
               <Text style={styles.menuItemText}>Usage</Text>
             </TouchableOpacity>
-
             <TouchableOpacity style={styles.menuItem}>
               <Settings size={18} color="#64748B" />
               <Text style={styles.menuItemText}>Settings</Text>
             </TouchableOpacity>
-
-            {/* UPGRADE BANNER */}
+            {/* UPGRADE PRO BOX */}
             <View style={styles.upgradeCard}>
               <Text style={styles.upgradeTitle}>Upgrade to Pro</Text>
               <Text style={styles.upgradeDesc}>
                 Unlimited AI mentor and analytics.
               </Text>
-              <TouchableOpacity style={styles.btnUpgrade} activeOpacity={0.85}>
+              <TouchableOpacity
+                style={styles.btnUpgrade}
+                activeOpacity={0.85}
+                onPress={() => {
+                  onClose();
+                  if (onNavigateToSubscription) onNavigateToSubscription();
+                }}
+              >
                 <Text style={styles.btnUpgradeText}>Upgrade</Text>
               </TouchableOpacity>
             </View>
-
             {/* SIGN OUT */}
             <TouchableOpacity
               style={styles.signOutItem}
