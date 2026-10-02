@@ -33,7 +33,8 @@ interface DashboardSidebarProps {
   onLogout: () => void;
   onNavigateToSubscription?: () => void;
   onNavigateToDashboard?: () => void;
-  onNavigateToUsage?: () => void; // <-- Thêm prop này
+  onNavigateToUsage?: () => void;
+  onNavigateToChat?: () => void; // Bắt buộc có dòng này
 }
 
 export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
@@ -43,6 +44,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
   onNavigateToSubscription,
   onNavigateToDashboard,
   onNavigateToUsage, // <-- Thêm prop này
+  onNavigateToChat,
 }) => {
   return (
     <Modal visible={visible} transparent animationType="fade">
@@ -81,7 +83,20 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                 Dashboard
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem}>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                console.log("Đã bấm AI Mentor");
+                onClose();
+                if (onNavigateToChat) {
+                  onNavigateToChat();
+                } else {
+                  console.warn(
+                    "onNavigateToChat chưa được truyền vào DashboardSidebar",
+                  );
+                }
+              }}
+            >
               <MessageSquare size={18} color="#64748B" />
               <Text style={styles.menuItemText}>AI Mentor</Text>
             </TouchableOpacity>
