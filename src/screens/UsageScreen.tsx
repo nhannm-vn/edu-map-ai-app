@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   View,
@@ -7,7 +7,10 @@ import {
   ScrollView,
   SafeAreaView,
   StatusBar,
+  ActivityIndicator,
+  RefreshControl,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   Menu,
   Sparkles,
@@ -19,9 +22,15 @@ import {
   FileText,
   FileCheck2,
   Briefcase,
+  HelpCircle,
 } from "lucide-react-native";
 import { DashboardSidebar } from "../components/DashboardSidebar";
-import { UserData } from "../services/authService";
+import {
+  UserData,
+  getBillingUsageApi,
+  BillingUsageData,
+  UsageItemData,
+} from "../services/authService";
 
 interface UsageScreenProps {
   user: UserData | null;
@@ -37,74 +46,100 @@ export const UsageScreen: React.FC<UsageScreenProps> = ({
   onNavigateToDashboard,
 }) => {
   const [sidebarVisible, setSidebarVisible] = useState(false);
+  const [usageData, setUsageData] = useState<BillingUsageData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  // Dữ liệu hạn mức chi tiết lấy theo giao diện mẫu
-  const usageItems = [
-    {
-      id: "1",
-      title: "AI Mentor chat",
-      description: "Messages with your AI mentor",
-      badge: "Daily",
-      used: 0,
-      total: 200,
-      cycleDate: "Oct 2, 2026",
-      Icon: MessageSquare,
-    },
-    {
-      id: "2",
-      title: "Skill tree generation",
-      description: "New skill tree analyses",
-      badge: "Monthly",
-      used: 0,
-      total: 20,
-      cycleDate: "Oct 1, 2026",
-      Icon: GitBranch,
-    },
-    {
-      id: "3",
-      title: "GitHub sync",
-      description: "Profile syncs from GitHub",
-      badge: "Daily",
-      used: 0,
-      total: 10,
-      cycleDate: "Oct 2, 2026",
-      Icon: FolderGit2,
-    },
-    {
-      id: "4",
-      title: "PDF report",
-      description: "Exported analysis reports",
-      badge: "Monthly",
-      used: 0,
-      total: 20,
-      cycleDate: "Oct 1, 2026",
-      Icon: FileText,
-    },
-    {
-      id: "5",
-      title: "Resume review",
-      description: "AI resume reviews",
-      badge: "Monthly",
-      used: 0,
-      total: 20,
-      cycleDate: "Oct 1, 2026",
-      Icon: FileCheck2,
-    },
-    {
-      id: "6",
-      title: "Job matching",
-      description: "Personalized job matches",
-      badge: "Monthly",
-      used: 0,
-      total: 100,
-      cycleDate: "Oct 1, 2026",
-      Icon: Briefcase,
-    },
-  ];
+  const fetchUsage = async () => {
+    try {
+      const token = await AsyncStorage.getItem("accessToken");
+      if (token) {
+        const res = await getBillingUsageApi(token);
+        if (res.success && res.data) {
+          setUsageData(res.data);
+        }
+      }
+    } catch (error) {
+      console.error("Lỗi lấy dữ liệu usage:", error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
 
-  const totalQuota = usageItems.reduce((acc, cur) => acc + cur.total, 0); // 370
-  const totalUsed = usageItems.reduce((acc, cur) => acc + cur.used, 0); // 0
-  const totalRemaining = totalQuota - totalUsed; // 370
+  useEffect(() => {
+    fetchUsage();
+  }, []);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchUsage();
+  };
+
+  // Format ngày: Oct 2, 2026
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return "";
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
+  // Ánh xạ thông tin giao diện theo featureCode
+  const getFeatureMeta = (code: string) => {
+    switch (code) {
+      case "AI_CHAT":
+        return {
+          title: "AI Mentor chat",
+          description: "Messages with your AI mentor",
+          Icon: MessageSquare,
+        };
+      case "SKILL_TREE_GENERATION":
+        return {
+          title: "Skill tree generation",
+          description: "New skill tree analyses",
+          Icon: GitBranch,
+        };
+      case "GITHUB_SYNC":
+        return {
+          title: "GitHub sync",
+          description: "Profile syncs from GitHub",
+          Icon: FolderGit2,
+        };
+      case "PDF_REPORT":
+        return {
+          title: "PDF report",
+          description: "Exported analysis reports",
+          Icon: FileText,
+        };
+      case "RESUME_REVIEW":
+        return {
+          title: "Resume review",
+          description: "AI resume reviews",
+          Icon: FileCheck2,
+        };
+      case "JOB_MATCHING":
+        return {
+          title: "Job matching",
+          description: "Personalized job matches",
+          Icon: Briefcase,
+        };
+      default:
+        return {
+          title: code,
+          description: "Feature limit and usage",
+          Icon: HelpCircle,
+        };
+    }
+  };
+
+  // Tính tổng
+  const items: UsageItemData[] = usageData?.usage || [];
+  const totalQuota = items.reduce((acc, cur) => acc + cur.limit, 0);
+  const totalUsed = items.reduce((acc, cur) => acc + cur.usage, 0);
+  const totalRemaining = items.reduce((acc, cur) => acc + cur.remaining, 0);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -117,6 +152,7 @@ export const UsageScreen: React.FC<UsageScreenProps> = ({
         onLogout={onLogout}
         onNavigateToSubscription={onNavigateToSubscription}
         onNavigateToDashboard={onNavigateToDashboard}
+        onNavigateToUsage={() => setSidebarVisible(false)}
       />
 
       {/* TOP HEADER */}
@@ -152,117 +188,141 @@ export const UsageScreen: React.FC<UsageScreenProps> = ({
         </View>
       </View>
 
-      {/* MAIN BODY SCROLL */}
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* TOP BACK & PLAN BADGE */}
-        <View style={styles.navSubRow}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={onNavigateToSubscription}
-            activeOpacity={0.7}
-          >
-            <ChevronLeft size={18} color="#64748B" />
-            <Text style={styles.backButtonText}>Subscription</Text>
-          </TouchableOpacity>
-
-          <View style={styles.planPill}>
-            <Text style={styles.planPillText}>PREMIUM</Text>
-          </View>
+      {/* MAIN BODY */}
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#4F46E5" />
         </View>
+      ) : (
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={["#4F46E5"]}
+            />
+          }
+        >
+          {/* TOP BACK & PLAN BADGE */}
+          <View style={styles.navSubRow}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={onNavigateToSubscription}
+              activeOpacity={0.7}
+            >
+              <ChevronLeft size={18} color="#64748B" />
+              <Text style={styles.backButtonText}>Subscription</Text>
+            </TouchableOpacity>
 
-        {/* PAGE TITLE */}
-        <Text style={styles.pageTitle}>Billing usage</Text>
-        <Text style={styles.pageSubtitle}>
-          Track how you use your <Text style={styles.boldText}>Premium</Text>{" "}
-          plan allowances.
-        </Text>
-
-        {/* 3 SUMMARY METRIC CARDS */}
-        <View style={styles.metricCard}>
-          <Text style={styles.metricLabel}>Total quota</Text>
-          <Text style={styles.metricValue}>{totalQuota}</Text>
-        </View>
-
-        <View style={styles.metricCard}>
-          <Text style={styles.metricLabel}>Used this cycle</Text>
-          <Text style={styles.metricValue}>{totalUsed}</Text>
-        </View>
-
-        <View style={styles.metricCard}>
-          <Text style={styles.metricLabel}>Remaining</Text>
-          <Text style={styles.metricValue}>{totalRemaining}</Text>
-        </View>
-
-        {/* DETAILED USAGE CARDS */}
-        {usageItems.map((item) => {
-          const remaining = item.total - item.used;
-          const progressPercent =
-            item.total > 0 ? (item.used / item.total) * 100 : 0;
-          const IconComp = item.Icon;
-
-          return (
-            <View key={item.id} style={styles.itemCard}>
-              <View style={styles.itemCardTop}>
-                <View style={styles.itemLeftWrap}>
-                  <View style={styles.iconBox}>
-                    <IconComp size={18} color="#64748B" />
-                  </View>
-                  <View>
-                    <Text style={styles.itemTitle}>{item.title}</Text>
-                    <Text style={styles.itemSubtitle}>{item.description}</Text>
-                  </View>
-                </View>
-                <View style={styles.frequencyBadge}>
-                  <Text style={styles.frequencyBadgeText}>{item.badge}</Text>
-                </View>
-              </View>
-
-              <View style={styles.itemCountRow}>
-                <Text style={styles.usedCountText}>
-                  {item.used} of {item.total} used
-                </Text>
-                <Text style={styles.remainingCountText}>
-                  {remaining} remaining
-                </Text>
-              </View>
-
-              <View style={styles.progressTrack}>
-                <View
-                  style={[
-                    styles.progressFill,
-                    { width: `${progressPercent}%` },
-                  ]}
-                />
-              </View>
-
-              <Text style={styles.cycleText}>
-                Cycle started {item.cycleDate}
+            <View style={styles.planPill}>
+              <Text style={styles.planPillText}>
+                {usageData?.planCode || "PREMIUM"}
               </Text>
             </View>
-          );
-        })}
+          </View>
 
-        {/* NEED MORE USAGE BANNER */}
-        <View style={styles.needMoreCard}>
-          <Text style={styles.needMoreTitle}>Need more usage?</Text>
-          <Text style={styles.needMoreDesc}>
-            Upgrade your plan for higher limits on every feature.
+          {/* PAGE TITLE */}
+          <Text style={styles.pageTitle}>Billing usage</Text>
+          <Text style={styles.pageSubtitle}>
+            Track how you use your{" "}
+            <Text style={styles.boldText}>
+              {usageData?.planCode === "PREMIUM"
+                ? "Premium"
+                : usageData?.planCode}
+            </Text>{" "}
+            plan allowances.
           </Text>
-          <TouchableOpacity
-            style={styles.btnViewPlans}
-            activeOpacity={0.85}
-            onPress={onNavigateToSubscription}
-          >
-            <Text style={styles.btnViewPlansText}>View plans</Text>
-          </TouchableOpacity>
-        </View>
 
-        <View style={{ height: 40 }} />
-      </ScrollView>
+          {/* 3 SUMMARY METRIC CARDS */}
+          <View style={styles.metricCard}>
+            <Text style={styles.metricLabel}>Total quota</Text>
+            <Text style={styles.metricValue}>{totalQuota}</Text>
+          </View>
+
+          <View style={styles.metricCard}>
+            <Text style={styles.metricLabel}>Used this cycle</Text>
+            <Text style={styles.metricValue}>{totalUsed}</Text>
+          </View>
+
+          <View style={styles.metricCard}>
+            <Text style={styles.metricLabel}>Remaining</Text>
+            <Text style={styles.metricValue}>{totalRemaining}</Text>
+          </View>
+
+          {/* DETAILED USAGE CARDS */}
+          {items.map((item, index) => {
+            const meta = getFeatureMeta(item.featureCode);
+            const IconComp = meta.Icon;
+            const progressPercent =
+              item.limit > 0 ? (item.usage / item.limit) * 100 : 0;
+            const badgeLabel =
+              item.usageWindow === "DAILY" ? "Daily" : "Monthly";
+
+            return (
+              <View key={index} style={styles.itemCard}>
+                <View style={styles.itemCardTop}>
+                  <View style={styles.itemLeftWrap}>
+                    <View style={styles.iconBox}>
+                      <IconComp size={18} color="#64748B" />
+                    </View>
+                    <View>
+                      <Text style={styles.itemTitle}>{meta.title}</Text>
+                      <Text style={styles.itemSubtitle}>
+                        {meta.description}
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={styles.frequencyBadge}>
+                    <Text style={styles.frequencyBadgeText}>{badgeLabel}</Text>
+                  </View>
+                </View>
+
+                <View style={styles.itemCountRow}>
+                  <Text style={styles.usedCountText}>
+                    {item.usage} of {item.limit} used
+                  </Text>
+                  <Text style={styles.remainingCountText}>
+                    {item.remaining} remaining
+                  </Text>
+                </View>
+
+                <View style={styles.progressTrack}>
+                  <View
+                    style={[
+                      styles.progressFill,
+                      { width: `${progressPercent}%` },
+                    ]}
+                  />
+                </View>
+
+                <Text style={styles.cycleText}>
+                  Cycle started {formatDate(item.usageDate)}
+                </Text>
+              </View>
+            );
+          })}
+
+          {/* NEED MORE USAGE BANNER */}
+          <View style={styles.needMoreCard}>
+            <Text style={styles.needMoreTitle}>Need more usage?</Text>
+            <Text style={styles.needMoreDesc}>
+              Upgrade your plan for higher limits on every feature.
+            </Text>
+            <TouchableOpacity
+              style={styles.btnViewPlans}
+              activeOpacity={0.85}
+              onPress={onNavigateToSubscription}
+            >
+              <Text style={styles.btnViewPlansText}>View plans</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={{ height: 40 }} />
+        </ScrollView>
+      )}
     </SafeAreaView>
   );
 };
@@ -312,6 +372,12 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     fontSize: 16,
     fontWeight: "700",
+  },
+  loadingContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#F8FAFC",
   },
   scroll: {
     flex: 1,
@@ -364,8 +430,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#0F172A",
   },
-
-  /* 3 SUMMARY METRIC CARDS */
   metricCard: {
     backgroundColor: "#ffffff",
     borderWidth: 1,
@@ -385,8 +449,6 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     color: "#0F172A",
   },
-
-  /* DETAILED USAGE CARD */
   itemCard: {
     backgroundColor: "#ffffff",
     borderWidth: 1,
@@ -469,8 +531,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#94A3B8",
   },
-
-  /* NEED MORE USAGE BANNER */
   needMoreCard: {
     backgroundColor: "#ffffff",
     borderWidth: 1,
