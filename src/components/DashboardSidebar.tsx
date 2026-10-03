@@ -35,6 +35,7 @@ interface DashboardSidebarProps {
   onNavigateToDashboard?: () => void;
   onNavigateToUsage?: () => void;
   onNavigateToChat?: () => void; // Bắt buộc có dòng này
+  onNavigateToUpload?: () => void;
 }
 
 export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
@@ -45,6 +46,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
   onNavigateToDashboard,
   onNavigateToUsage, // <-- Thêm prop này
   onNavigateToChat,
+  onNavigateToUpload,
 }) => {
   return (
     <Modal visible={visible} transparent animationType="fade">
@@ -100,7 +102,13 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
               <MessageSquare size={18} color="#64748B" />
               <Text style={styles.menuItemText}>AI Mentor</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem}>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                onClose();
+                if (onNavigateToUpload) onNavigateToUpload();
+              }}
+            >
               <UploadCloud size={18} color="#64748B" />
               <Text style={styles.menuItemText}>Upload & Analyze</Text>
             </TouchableOpacity>
