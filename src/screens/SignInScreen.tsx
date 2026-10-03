@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Sparkles, Mail, Lock, ArrowRight, Check } from "lucide-react-native";
-import { loginApi, UserData } from "../services/authService";
+import { loginApi, UserData } from "../services/apiService";
 
 interface SignInScreenProps {
   onNavigateToSignUp: () => void;

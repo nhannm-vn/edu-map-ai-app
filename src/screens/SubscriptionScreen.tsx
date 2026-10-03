@@ -26,7 +26,7 @@ import {
   getMySubscriptionApi,
   PlanItem,
   MySubscriptionData,
-} from "../services/authService";
+} from "../services/apiService";
 
 interface SubscriptionScreenProps {
   user: UserData | null;

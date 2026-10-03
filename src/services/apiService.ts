@@ -161,6 +161,23 @@ export interface BillingUsageResponse {
   message?: string;
 }
 
+export interface ChatMessageDto {
+  id: string;
+  role: "USER" | "ASSISTANT";
+  content: string;
+  createdAt?: string;
+}
+
+export interface ChatSessionDto {
+  id: string;
+  userId?: string;
+  title: string;
+  lastMessageAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  messages?: ChatMessageDto[];
+}
+
 const BASE_URL = "https://edumapai.io.vn/api";
 
 export const loginApi = async (
@@ -281,5 +298,101 @@ export const getBillingUsageApi = async (
     return await response.json();
   } catch (error: any) {
     throw new Error(error?.message || "Không thể lấy dữ liệu hạn mức sử dụng.");
+  }
+};
+
+export const getChatSessionsApi = async (token: string) => {
+  try {
+    const response = await fetch(`${BASE_URL}/v1/chat/sessions`, {
+      method: "GET",
+      headers: {
+        Accept: "*/*",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return await response.json();
+  } catch (error: any) {
+    throw new Error(
+      error?.message || "Không thể lấy danh sách phiên trò chuyện.",
+    );
+  }
+};
+
+export const getChatSessionDetailApi = async (
+  token: string,
+  sessionId: string,
+) => {
+  try {
+    const response = await fetch(`${BASE_URL}/v1/chat/sessions/${sessionId}`, {
+      method: "GET",
+      headers: {
+        Accept: "*/*",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return await response.json();
+  } catch (error: any) {
+    throw new Error(
+      error?.message || "Không thể lấy chi tiết phiên trò chuyện.",
+    );
+  }
+};
+
+export const createChatSessionApi = async (token: string, title: string) => {
+  try {
+    const response = await fetch(`${BASE_URL}/v1/chat/sessions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "*/*",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ title }),
+    });
+    return await response.json();
+  } catch (error: any) {
+    throw new Error(error?.message || "Không thể tạo phiên trò chuyện mới.");
+  }
+};
+
+export const sendChatMessageApi = async (
+  token: string,
+  sessionId: string,
+  content: string,
+) => {
+  try {
+    const response = await fetch(
+      `${BASE_URL}/v1/chat/sessions/${sessionId}/messages`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "*/*",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ content }),
+      },
+    );
+    return await response.json();
+  } catch (error: any) {
+    throw new Error(error?.message || "Không thể gửi tin nhắn.");
+  }
+};
+
+export const deleteChatSessionApi = async (
+  token: string,
+  sessionId: string,
+) => {
+  try {
+    const response = await fetch(`${BASE_URL}/v1/chat/sessions/${sessionId}`, {
+      method: "DELETE",
+      headers: {
+        Accept: "*/*",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return await response.json();
+  } catch (error: any) {
+    throw new Error(error?.message || "Không thể xóa phiên trò chuyện.");
   }
 };
