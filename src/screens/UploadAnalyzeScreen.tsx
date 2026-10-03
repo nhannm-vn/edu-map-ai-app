@@ -5,7 +5,6 @@ import {
   Text,
   TouchableOpacity,
   ScrollView,
-  SafeAreaView,
   StatusBar,
   TextInput,
   KeyboardAvoidingView,
@@ -24,7 +23,8 @@ import {
 } from "lucide-react-native";
 // Sử dụng icon GitHub SVG hoặc icon sẵn có
 import { DashboardSidebar } from "../components/DashboardSidebar";
-import { UserData } from "../services/authService";
+import { UserData } from "../services/apiService";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 type AnalysisMode = "ACADEMIC" | "GITHUB" | "HYBRID";
 

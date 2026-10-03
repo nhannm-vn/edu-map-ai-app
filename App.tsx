@@ -11,7 +11,7 @@ import { UsageScreen } from "./src/screens/UsageScreen";
 import { ChatAiScreen } from "./src/screens/ChatAiScreen";
 import { UploadAnalyzeScreen } from "./src/screens/UploadAnalyzeScreen";
 import { MobileMenu } from "./src/components/MobileMenu";
-import { UserData } from "./src/services/authService";
+import { UserData } from "./src/services/apiService";
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<

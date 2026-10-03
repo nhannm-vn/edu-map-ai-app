@@ -30,7 +30,7 @@ import {
   getBillingUsageApi,
   BillingUsageData,
   UsageItemData,
-} from "../services/authService";
+} from "../services/apiService";
 
 interface UsageScreenProps {
   user: UserData | null;

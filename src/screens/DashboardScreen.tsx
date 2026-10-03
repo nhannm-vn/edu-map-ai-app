@@ -24,7 +24,7 @@ import {
   UserData,
   getSkillSummaryApi,
   SkillSummaryData,
-} from "../services/authService";
+} from "../services/apiService";
 import { DashboardSidebar } from "../components/DashboardSidebar";
 import { SafeAreaView } from "react-native-safe-area-context";
 
