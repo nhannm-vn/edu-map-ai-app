@@ -8,9 +8,10 @@ import { SignInScreen } from "./src/screens/SignInScreen";
 import { DashboardScreen } from "./src/screens/DashboardScreen";
 import { SubscriptionScreen } from "./src/screens/SubscriptionScreen";
 import { UsageScreen } from "./src/screens/UsageScreen";
+import { ChatAiScreen } from "./src/screens/ChatAiScreen";
+import { UploadAnalyzeScreen } from "./src/screens/UploadAnalyzeScreen";
 import { MobileMenu } from "./src/components/MobileMenu";
 import { UserData } from "./src/services/authService";
-import { ChatAiScreen } from "./src/screens/ChatAiScreen";
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<
@@ -21,6 +22,7 @@ export default function App() {
     | "subscription"
     | "usage"
     | "chat"
+    | "upload"
   >("home");
   const [currentUser, setCurrentUser] = useState<UserData | null>(null);
   const [menuVisible, setMenuVisible] = useState(false);
@@ -91,6 +93,7 @@ export default function App() {
             onNavigateToSubscription={() => setCurrentScreen("subscription")}
             onNavigateToUsage={() => setCurrentScreen("usage")}
             onNavigateToChat={() => setCurrentScreen("chat")}
+            onNavigateToUpload={() => setCurrentScreen("upload")}
           />
         )}
 
@@ -100,6 +103,7 @@ export default function App() {
             user={currentUser}
             onLogout={handleLogout}
             onNavigateToDashboard={() => setCurrentScreen("dashboard")}
+            onNavigateToUsage={() => setCurrentScreen("usage")}
           />
         )}
 
@@ -121,6 +125,18 @@ export default function App() {
             onNavigateToDashboard={() => setCurrentScreen("dashboard")}
             onNavigateToSubscription={() => setCurrentScreen("subscription")}
             onNavigateToUsage={() => setCurrentScreen("usage")}
+          />
+        )}
+
+        {/* 8. Màn hình Upload & Analyze */}
+        {currentScreen === "upload" && (
+          <UploadAnalyzeScreen
+            user={currentUser}
+            onLogout={handleLogout}
+            onNavigateToDashboard={() => setCurrentScreen("dashboard")}
+            onNavigateToSubscription={() => setCurrentScreen("subscription")}
+            onNavigateToUsage={() => setCurrentScreen("usage")}
+            onNavigateToChat={() => setCurrentScreen("chat")}
           />
         )}
       </SafeAreaView>

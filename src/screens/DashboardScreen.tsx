@@ -33,7 +33,8 @@ interface DashboardScreenProps {
   onLogout: () => void;
   onNavigateToSubscription?: () => void;
   onNavigateToUsage?: () => void;
-  onNavigateToChat?: () => void; // 1. Khai báo ở đây
+  onNavigateToChat?: () => void;
+  onNavigateToUpload?: () => void;
 }
 
 export const DashboardScreen: React.FC<DashboardScreenProps> = ({
@@ -42,6 +43,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
   onNavigateToSubscription,
   onNavigateToUsage,
   onNavigateToChat,
+  onNavigateToUpload,
 }) => {
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [summaryData, setSummaryData] = useState<SkillSummaryData | null>(null);
@@ -93,7 +95,8 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
         onLogout={onLogout}
         onNavigateToSubscription={onNavigateToSubscription}
         onNavigateToUsage={onNavigateToUsage}
-        onNavigateToChat={onNavigateToChat} // 3. Truyền xuống Sidebar ở đây
+        onNavigateToChat={onNavigateToChat}
+        onNavigateToUpload={onNavigateToUpload}
       />
 
       {/* TOP HEADER */}
@@ -154,7 +157,11 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
           </Text>
 
           {/* CTA: RUN NEW ANALYSIS */}
-          <TouchableOpacity style={styles.btnAnalysis} activeOpacity={0.85}>
+          <TouchableOpacity
+            style={styles.btnAnalysis}
+            activeOpacity={0.85}
+            onPress={onNavigateToUpload}
+          >
             <Sparkles size={16} color="#ffffff" />
             <Text style={styles.btnAnalysisText}>Run new analysis</Text>
           </TouchableOpacity>
